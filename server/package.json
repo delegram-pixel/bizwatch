@@ -1,0 +1,36 @@
+{
+  "name": "bizwatch-server",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "predev": "npx kill-port 3000 --silent || true",
+    "dev": "nodemon src/index.js",
+    "kill-port": "for /f \"tokens=5\" %a in ('netstat -ano ^| findstr :3000') do taskkill /F /PID %a 2>nul & exit 0",
+    "start": "node api/index.js",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "@google-cloud/vision": "^5.3.6",
+    "@prisma/client": "^6.0.0",
+    "connect-pg-simple": "^10.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-session": "^1.18.1",
+    "google-auth-library": "^9.15.0",
+    "googleapis": "^144.0.0",
+    "pdf-parse": "^2.4.5",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "prisma": "^6.0.0"
+  },
+  "description": "",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
