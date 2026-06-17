@@ -1,6 +1,6 @@
 'use client'
 
-import SectionHeader from '@/components/ui/SectionHeader'
+import SectionHeader from '@/components/SectionHeader'
 import SourceCard from '@/components/Knowledgebase/SourceCard'
 import CustomKnowledgeCard from '@/components/Knowledgebase/CustomKnowledgeCard'
 import { sources, customSources } from '@/data/data'

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { getGoogleAuthUrl } from '@/lib/api'
-import Button from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import {
   Mail, HardDrive, Calendar, FileSpreadsheet,
   Camera, Check, RefreshCw, Trash2, AlertTriangle,
@@ -249,7 +249,7 @@ export default function Settings() {
             <div className="flex justify-end">
               <div className="relative">
                 {profileDirty && <span className="absolute -right-1 -top-1 z-10 h-2.5 w-2.5 rounded-full bg-yellow-400 ring-2 ring-[#0f0d17]" />}
-                <Button variant="primary" onClick={saveProfile}>Save changes</Button>
+                <Button variant="default" onClick={saveProfile}>Save changes</Button>
               </div>
             </div>
           </div>
@@ -269,7 +269,7 @@ export default function Settings() {
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${connected[id] ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-slate-500'}`}>
                   {connected[id] ? 'Connected' : 'Not connected'}
                 </span>
-                <Button variant={connected[id] ? 'outline' : 'primary'} size="md" onClick={() => toggleService(id)} className={`shrink-0 !px-3 !py-1.5 text-xs ${connected[id] ? '!text-red-400 hover:!border-red-500/30 hover:!bg-red-500/5' : ''}`}>
+                <Button variant={connected[id] ? 'outline' : 'default'} size="sm" onClick={() => toggleService(id)} className={`shrink-0 !px-3 !py-1.5 text-xs ${connected[id] ? '!text-red-400 hover:!border-red-500/30 hover:!bg-red-500/5' : ''}`}>
                   {connected[id] ? 'Disconnect' : 'Connect'}
                 </Button>
               </div>
@@ -334,7 +334,7 @@ export default function Settings() {
               </div>
             </Field>
             <div className="flex justify-end pt-1">
-              <Button variant="primary" onClick={saveAiPrefs}><Check size={13} />Save preferences</Button>
+              <Button variant="default" onClick={saveAiPrefs}><Check size={13} />Save preferences</Button>
             </div>
           </div>
         </SectionCard>

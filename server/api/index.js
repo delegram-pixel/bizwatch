@@ -1,6 +1,8 @@
 const express = require('express')
 const cors = require('cors')
 const session = require('express-session')
+const { spawn } = require('child_process')
+const path = require('path')
 const connectPgSimple = require('connect-pg-simple')
 const { Pool } = require('pg')
 const { google } = require('googleapis')
@@ -121,7 +123,7 @@ const EXTRACTABLE_TYPES = new Set([
   'text/plain',
 ])
 
-const CHARS_PER_FILE = 4000
+const CHARS_PER_FILE = 7000
 
 async function extractFileContent(driveClient, file) {
   try {
@@ -137,9 +139,21 @@ async function extractFileContent(driveClient, file) {
     if (type === 'application/pdf') {
       const res = await driveClient.files.get({ fileId: id, alt: 'media' }, { responseType: 'arraybuffer' })
       const buffer = Buffer.isBuffer(res.data) ? res.data : Buffer.from(res.data)
-      const pdfParse = require('pdf-parse')
-      const parsed = await pdfParse(buffer)
-      return parsed.text.slice(0, CHARS_PER_FILE)
+      const markdown = await new Promise((resolve, reject) => {
+        const script = path.join(__dirname, '..', 'pdf_to_markdown.py')
+        const py = spawn('python3', [script])
+        const chunks = []
+        py.stdout.on('data', (chunk) => chunks.push(chunk))
+        py.stderr.on('data', (err) => console.warn('pdf_to_markdown stderr:', err.toString()))
+        py.on('close', (code) => {
+          if (code !== 0) return reject(new Error(`pdf_to_markdown exited with code ${code}`))
+          resolve(Buffer.concat(chunks).toString('utf8'))
+        })
+        py.on('error', reject)
+        py.stdin.write(buffer)
+        py.stdin.end()
+      })
+      return markdown.slice(0, CHARS_PER_FILE)
     }
     if (type === 'text/plain') {
       const res = await driveClient.files.get({ fileId: id, alt: 'media' }, { responseType: 'text' })

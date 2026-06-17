@@ -4,6 +4,9 @@ import { useState } from 'react'
 import { Icon } from '@iconify/react'
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -116,67 +119,67 @@ export default function WorkspaceConnector({
       </div>
 
       {/* Card */}
-      <div className="w-full max-w-[22rem] rounded-2xl border border-slate-200 bg-[var(--surface-strong)] p-7 sm:max-w-md sm:p-8">
-
-        {error && (
-          <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-400">
-            {error}
-          </div>
-        )}
-
-        <div className="mb-6">
-          <h2 className="text-[1.05rem] font-semibold text-slate-900 mb-1.5">
-            Connect your workspace
-          </h2>
-          <p className="text-[13px] text-slate-600 leading-relaxed">
-            Grant BizWatch permissions to analyze your Google Workspace
-            activity. We use this data solely to generate insights and
-            proactive alerts.
-          </p>
-        </div>
-
-        {/* Integration rows */}
-        <div className="rounded-xl border border-slate-200/70 divide-y divide-slate-200/50 overflow-hidden mb-5">
-          {INTEGRATIONS.map(({ id, label, icon }) => (
-            <div
-              key={id}
-              className="flex items-center gap-3.5 px-4 py-3.5 bg-[var(--surface)]"
-            >
-              <div className="w-8 h-8 flex items-center justify-center shrink-0 rounded-2xl bg-white shadow-sm">
-                <Icon icon={icon} width={26} height={26} />
-              </div>
-              <span className="flex-1 text-[13px] font-medium text-slate-900">
-                {label}
-              </span>
-              <StatusBadge status={statuses[id]} />
+      <Card className="w-full max-w-[22rem] border border-slate-200 ring-0 shadow-none sm:max-w-md">
+        <CardContent className="p-7 sm:p-8">
+          {error && (
+            <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-400">
+              {error}
             </div>
-          ))}
-        </div>
-
-        {/* Continue with Google */}
-        <button
-          type="button"
-          onClick={handleConnect}
-          disabled={globalLoading || allConnected}
-          className="w-full flex items-center justify-center gap-2.5 rounded-xl py-3.5 text-[13px] font-semibold text-white bg-violet-600 hover:bg-violet-500 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-[0_4px_20px_-4px_rgba(124,58,237,0.35)] cursor-pointer"
-        >
-          {globalLoading ? (
-            <Loader2 size={17} className="animate-spin text-gray-700" />
-          ) : (
-            <GoogleGLogo />
           )}
-          {allConnected
-            ? 'All services connected'
-            : globalLoading
-            ? 'Connecting…'
-            : 'Continue with Google'}
-        </button>
 
-        <p className="mt-4 text-center text-[11px] text-slate-500 leading-relaxed">
-          We never store your data content on our servers. Analysis is performed
-          in real-time and metadata is encrypted with AES-256.
-        </p>
-      </div>
+          <div className="mb-6">
+            <h2 className="text-[1.05rem] font-semibold text-slate-900 mb-1.5">
+              Connect your workspace
+            </h2>
+            <p className="text-[13px] text-slate-600 leading-relaxed">
+              Grant BizWatch permissions to analyze your Google Workspace
+              activity. We use this data solely to generate insights and
+              proactive alerts.
+            </p>
+          </div>
+
+          {/* Integration rows */}
+          <div className="rounded-xl border border-slate-200/70 divide-y divide-slate-200/50 overflow-hidden mb-5">
+            {INTEGRATIONS.map(({ id, label, icon }) => (
+              <div
+                key={id}
+                className="flex items-center gap-3.5 px-4 py-3.5 bg-[var(--surface)]"
+              >
+                <div className="w-8 h-8 flex items-center justify-center shrink-0 rounded-2xl bg-white shadow-sm">
+                  <Icon icon={icon} width={26} height={26} />
+                </div>
+                <span className="flex-1 text-[13px] font-medium text-slate-900">
+                  {label}
+                </span>
+                <StatusBadge status={statuses[id]} />
+              </div>
+            ))}
+          </div>
+
+          {/* Continue with Google */}
+          <Button
+            onClick={handleConnect}
+            disabled={globalLoading || allConnected}
+            className="w-full rounded-xl py-3.5 h-auto text-[13px] font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-[0_4px_20px_-4px_rgba(124,58,237,0.35)]"
+          >
+            {globalLoading ? (
+              <Loader2 size={17} className="animate-spin" />
+            ) : (
+              <GoogleGLogo />
+            )}
+            {allConnected
+              ? 'All services connected'
+              : globalLoading
+              ? 'Connecting…'
+              : 'Continue with Google'}
+          </Button>
+
+          <p className="mt-4 text-center text-[11px] text-slate-500 leading-relaxed">
+            We never store your data content on our servers. Analysis is performed
+            in real-time and metadata is encrypted with AES-256.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Footer nav */}
       <nav className="mt-8 flex gap-5 text-[11px] text-slate-500">
@@ -193,36 +196,33 @@ export default function WorkspaceConnector({
 // ── Sub-components ────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }: { status: ConnectionStatus }) {
-  const base =
-    'inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.22em] whitespace-nowrap'
-
   if (status === 'connected')
     return (
-      <span className={`${base} border border-emerald-500/25 bg-emerald-500/10 text-emerald-400`}>
+      <Badge className="gap-1 border border-emerald-500/25 bg-emerald-500/10 text-emerald-700 text-[10px] tracking-[0.22em] uppercase">
         <CheckCircle2 size={9} />
         Connected
-      </span>
+      </Badge>
     )
 
   if (status === 'loading')
     return (
-      <span className={`${base} border border-slate-200 bg-slate-100 text-slate-600`}>
+      <Badge variant="outline" className="gap-1 text-[10px] tracking-[0.22em] uppercase">
         <Loader2 size={9} className="animate-spin" />
         Connecting
-      </span>
+      </Badge>
     )
 
   if (status === 'error')
     return (
-      <span className={`${base} border border-red-500/20 bg-red-500/5 text-red-400`}>
+      <Badge variant="destructive" className="text-[10px] tracking-[0.22em] uppercase">
         Error
-      </span>
+      </Badge>
     )
 
   return (
-    <span className={`${base} border border-slate-200 bg-slate-100 text-slate-600`}>
+    <Badge variant="outline" className="text-[10px] tracking-[0.22em] uppercase">
       Read Only
-    </span>
+    </Badge>
   )
 }
 

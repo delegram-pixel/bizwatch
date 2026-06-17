@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { X } from 'lucide-react'
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
 import Logo from './logo'
 import SidebarNavlinks from './SidebarNavlinks'
 import Bottom from './bottom'
@@ -9,34 +9,26 @@ import Bottom from './bottom'
 export default function Sidebar({ isOpen, onClose }) {
   return (
     <>
-      <aside
-        className={`fixed inset-y-0 left-0 z-30 w-57.5 transform border-r border-slate-200 bg-[var(--surface-strong)] px-6 py-7 transition duration-300 ease-in-out sm:relative sm:translate-x-0 sm:h-full sm:flex sm:flex-col sm:overflow-y-auto ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex items-center justify-between gap-4 sm:hidden">
+      {/* Mobile: Sheet drawer */}
+      <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+        <SheetContent side="left" className="w-64 px-6 py-7 flex flex-col bg-[var(--surface-strong)] border-r border-slate-200 sm:hidden">
+          <SheetTitle className="sr-only">Navigation</SheetTitle>
           <Logo />
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-3xl bg-slate-100 text-slate-600 transition cursor-pointer hover:bg-slate-200 hover:text-slate-900"
-          >
-            <X size={18} />
-          </button>
-        </div>
-
-        <div className="flex flex-col flex-1 gap-8">
-          <div className="hidden sm:block">
-            <Logo />
+          <div className="flex flex-col flex-1 gap-8 mt-8">
+            <SidebarNavlinks />
           </div>
+          <Bottom />
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop: static sidebar */}
+      <aside className="hidden sm:flex sm:flex-col sm:h-full sm:overflow-y-auto w-57.5 border-r border-slate-200 bg-[var(--surface-strong)] px-6 py-7">
+        <div className="flex flex-col flex-1 gap-8">
+          <Logo />
           <SidebarNavlinks />
         </div>
         <Bottom />
       </aside>
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 z-20 bg-black/40 transition-opacity sm:hidden ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
-      />
     </>
   )
 }

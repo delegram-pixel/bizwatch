@@ -2,9 +2,9 @@
 
 import { useMemo, useState } from 'react'
 import { Activity } from 'lucide-react'
-import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
-import SectionHeader from '@/components/ui/SectionHeader'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import SectionHeader from '@/components/SectionHeader'
 import HistorySearch from '@/components/history/HistorySearch'
 import HistorySection from '@/components/history/HistorySection'
 import { chatHistory } from '@/data/chat-history'
@@ -101,16 +101,19 @@ export default function History() {
           <Button variant="secondary" size="lg" className="hidden sm:inline-flex">
             Export
           </Button>
+
         }
       />
 
-      <Card className="space-y-6">
-        <HistorySearch value={query} onChange={handleSearch} onFilter={() => null} />
-        <div className="space-y-8">
-          {filteredGroups.map((group) => (
-            <HistorySection key={group.title} title={group.title} items={group.items} />
-          ))}
-        </div>
+      <Card className="border border-slate-200 ring-0 shadow-none">
+        <CardContent className="p-6 space-y-6">
+          <HistorySearch value={query} onChange={handleSearch} onFilter={() => null} />
+          <div className="space-y-8">
+            {filteredGroups.map((group) => (
+              <HistorySection key={group.title} title={group.title} items={group.items} />
+            ))}
+          </div>
+        </CardContent>
       </Card>
     </div>
   )

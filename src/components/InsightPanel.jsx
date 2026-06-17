@@ -1,7 +1,7 @@
 'use client'
 
 import InsightCard from './InsightCard.jsx'
-import SkeletonCard from './SkeletonCard.jsx'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function InsightPanel({ insights, loading }) {
   const summary = insights?.summary
@@ -22,9 +22,13 @@ export default function InsightPanel({ insights, loading }) {
 
       {loading ? (
         <div className="space-y-3">
-          <SkeletonCard lines={3} />
-          <SkeletonCard lines={2} />
-          <SkeletonCard lines={3} />
+          {[3, 2, 3].map((lines, i) => (
+            <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-3">
+              {Array.from({ length: lines }).map((_, j) => (
+                <Skeleton key={j} className="h-3" style={{ width: j === 0 ? '55%' : '85%' }} />
+              ))}
+            </div>
+          ))}
         </div>
       ) : list.length === 0 ? (
         <p className="text-sm text-slate-500 py-4">Connect your Google Workspace to see insights.</p>

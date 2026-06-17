@@ -1,6 +1,7 @@
 'use client'
 
 import { RefreshCw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { timeAgo, sourceLabel } from '../lib/utils.js'
 
 const SOURCE_KEYS = ['sheets', 'drive', 'gmail', 'calendar']
@@ -27,15 +28,15 @@ export default function ConnectionStatus({ sources, lastUpdated, onRefresh, load
         {lastUpdated && (
           <span className="text-xs text-slate-500">{timeAgo(lastUpdated)}</span>
         )}
-        <button
-          type="button"
+        <Button
+          variant="secondary"
+          size="icon-sm"
           onClick={onRefresh}
           disabled={loading}
-          className="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900 transition cursor-pointer disabled:opacity-40"
           title="Refresh analysis"
         >
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-        </button>
+        </Button>
       </div>
     </div>
   )

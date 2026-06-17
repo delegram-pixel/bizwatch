@@ -1,12 +1,14 @@
 'use client'
 
+import { Skeleton } from '@/components/ui/skeleton'
+
 export default function SkeletonCard({ lines = 2 }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3 animate-pulse">
+    <div className="rounded-xl border border-slate-200 p-4 space-y-3">
       {Array.from({ length: lines }).map((_, i) => (
-        <div
+        <Skeleton
           key={i}
-          className="h-3 bg-white/10 rounded-full"
+          className="h-3 rounded-full"
           style={{ width: i === 0 ? '55%' : '85%' }}
         />
       ))}
