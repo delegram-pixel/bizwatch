@@ -1,4 +1,4 @@
-const CLAUDE_API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/claude`
+const CLAUDE_API_URL = '/api/claude'
 const MODEL = 'claude-haiku-4-5-20251001'
 
 const SYSTEM_PROMPT = `You are BizWatch AI — the intelligence layer inside BizWatch, a Business Overwatch System built for small business owners in Nigeria and emerging markets.

@@ -200,8 +200,7 @@ export default function Settings() {
   }
 
   async function confirmDeleteAccount() {
-    const BASE = process.env.NEXT_PUBLIC_API_URL
-    await fetch(`${BASE}/api/auth/account`, { method: 'DELETE', credentials: 'include' }).catch(() => {})
+    await fetch('/api/auth/account', { method: 'DELETE', credentials: 'include' }).catch(() => {})
     localStorage.clear()
     window.location.href = '/'
   }
