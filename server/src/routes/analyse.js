@@ -1,11 +1,10 @@
 const { Router } = require('express')
 const { google } = require('googleapis')
 const Anthropic = require('@anthropic-ai/sdk')
-const { PDFParse } = require('pdf-parse')
 const fs = require('fs/promises')
 const os = require('os')
 const path = require('path')
-const { execFile } = require('child_process')
+const { execFile, spawn } = require('child_process')
 const util = require('util')
 const execFileAsync = util.promisify(execFile)
 
@@ -155,7 +154,7 @@ const EXTRACTABLE_TYPES = new Set([
   'text/plain',
 ])
 
-const CHARS_PER_FILE = 4000 // ~1000 tokens per file
+const CHARS_PER_FILE = 7000
 
 async function extractFileContent(driveClient, file) {
   try {
@@ -183,21 +182,21 @@ async function extractFileContent(driveClient, file) {
         { responseType: 'arraybuffer' }
       )
       const buffer = Buffer.isBuffer(res.data) ? res.data : Buffer.from(res.data)
-      const parsed = await new PDFParse({ data: buffer }).getText()
-
-      // If parsed text is short, try OCR fallback (scanned PDF)
-      if (!parsed.text || String(parsed.text).trim().length < 250) {
-        try {
-          const ocrText = await ocrThenExtract(buffer)
-          if (ocrText && ocrText.trim().length > 0) {
-            return String(ocrText).slice(0, CHARS_PER_FILE)
-          }
-        } catch (ocrErr) {
-          console.warn(`OCR fallback failed for "${name}":`, ocrErr.message)
-        }
-      }
-
-      return parsed.text.slice(0, CHARS_PER_FILE)
+      const markdown = await new Promise((resolve, reject) => {
+        const script = path.join(__dirname, '..', '..', 'pdf_to_markdown.py')
+        const py = spawn('python3', [script])
+        const chunks = []
+        py.stdout.on('data', (chunk) => chunks.push(chunk))
+        py.stderr.on('data', (err) => console.warn('pdf_to_markdown stderr:', err.toString()))
+        py.on('close', (code) => {
+          if (code !== 0) return reject(new Error(`pdf_to_markdown exited with code ${code}`))
+          resolve(Buffer.concat(chunks).toString('utf8'))
+        })
+        py.on('error', reject)
+        py.stdin.write(buffer)
+        py.stdin.end()
+      })
+      return markdown.slice(0, CHARS_PER_FILE)
     }
 
     if (type === 'text/plain') {
