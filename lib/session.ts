@@ -58,7 +58,7 @@ export function commitSession(response: NextResponse, token: string) {
     value: token,
     path: '/',
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     maxAge: COOKIE_MAX_AGE,
   })
