@@ -6,6 +6,8 @@ WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
+COPY prisma ./prisma
+RUN npx prisma generate
 
 COPY requirements.txt ./
 RUN pip3 install --break-system-packages -r requirements.txt
