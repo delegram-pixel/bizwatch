@@ -1,11 +1,34 @@
 'use client'
 
+import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { urgencyColor, urgencyLabel, formatDate } from '../lib/utils.js'
 
+function SourceCitation({ source_file, source_quote }) {
+  const [open, setOpen] = useState(false)
+  if (!source_file || !source_quote) return null
+  const excerpt = source_quote.length > 200 ? source_quote.slice(0, 200) + '…' : source_quote
+  return (
+    <div className="mt-3 pt-2 border-t border-slate-100">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="text-[10px] text-slate-400 hover:text-slate-600 uppercase tracking-widest flex items-center gap-1"
+      >
+        <span>{open ? '▼' : '▶'}</span> View source
+      </button>
+      {open && (
+        <div className="mt-1.5 pl-2 border-l-2 border-slate-200">
+          <p className="text-[10px] font-semibold text-slate-500">📄 {source_file}</p>
+          <p className="text-[10px] text-slate-400 italic mt-0.5 leading-relaxed">"{excerpt}"</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function AlertCard({ alert }) {
-  const { title, detail, urgency, action_required, deadline, client_or_entity } = alert
+  const { title, detail, urgency, action_required, deadline, client_or_entity, source_file, source_quote } = alert
   const color = urgencyColor(urgency)
   const isCritical = urgency === 'critical'
 
@@ -52,6 +75,7 @@ export default function AlertCard({ alert }) {
             Deadline: {formatDate(deadline)}
           </p>
         )}
+        <SourceCitation source_file={source_file} source_quote={source_quote} />
       </CardContent>
     </Card>
   )

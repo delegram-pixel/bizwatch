@@ -12,24 +12,24 @@ You will receive raw data from the user's Google Workspace. Analyse it and retur
   "insights": {
     "summary": "<2-3 sentence executive summary>",
     "insights": [
-      { "id": "ins_001", "type": "financial|communication|client|operational", "title": "<short title>", "detail": "<1-2 specific sentences>", "severity": "critical|warning|info", "source": "drive|gmail|sheets|calendar", "timestamp": "<ISO timestamp>" }
+      { "id": "ins_001", "type": "financial|communication|client|operational", "title": "<short title>", "detail": "<1-2 specific sentences>", "severity": "critical|warning|info", "source": "drive|gmail|sheets|calendar", "timestamp": "<ISO timestamp>", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim sentence or phrase from the document content that supports this insight, or null>" }
     ]
   },
   "predictions": {
     "outlook": "positive|cautious|negative",
     "predictions": [
-      { "id": "pred_001", "type": "cashflow|workload|churn|growth", "title": "<short title>", "detail": "<specific forecast>", "confidence": "high|medium|low", "timeframe": "<e.g. 2 weeks>", "recommended_action": "<concrete action>", "source": "drive|gmail|sheets|calendar" }
+      { "id": "pred_001", "type": "cashflow|workload|churn|growth", "title": "<short title>", "detail": "<specific forecast>", "confidence": "high|medium|low", "timeframe": "<e.g. 2 weeks>", "recommended_action": "<concrete action>", "source": "drive|gmail|sheets|calendar", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim sentence or phrase from the document content that supports this prediction, or null>" }
     ]
   },
   "alerts": {
     "unread_count": <number>,
     "alerts": [
-      { "id": "alert_001", "type": "churn_risk|contract_expiry|overdue_payment|deadline", "title": "<short title>", "detail": "<specific detail>", "urgency": "critical|high|medium", "action_required": "<concrete action>", "deadline": "<ISO timestamp or null>", "source": "drive|gmail|sheets|calendar", "client_or_entity": "<name or null>" }
+      { "id": "alert_001", "type": "churn_risk|contract_expiry|overdue_payment|deadline", "title": "<short title>", "detail": "<specific detail>", "urgency": "critical|high|medium", "action_required": "<concrete action>", "deadline": "<ISO timestamp or null>", "source": "drive|gmail|sheets|calendar", "client_or_entity": "<name or null>", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim sentence or phrase from the document content that supports this alert, or null>" }
     ]
   }
 }
 
-Derive everything from the actual data provided. Use ₦ for financial figures unless another currency is evident. Be specific — reference actual file names, email senders, event titles.`
+Derive everything from the actual data provided. Use ₦ for financial figures unless another currency is evident. Be specific — reference actual file names, email senders, event titles. For source_file and source_quote: populate these only when the item is derived from a Drive document — use the exact file name and copy the verbatim text from the document content. Set both to null when the source is gmail or calendar.`
 
 export async function POST(request: Request) {
   const session = await getSession(request)
