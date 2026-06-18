@@ -141,11 +141,16 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
       const res = await driveClient.files.get({ fileId: id, alt: 'media' }, { responseType: 'arraybuffer' })
       const buffer = Buffer.isBuffer(res.data) ? res.data : Buffer.from(res.data)
       const parsed = await parsePdf(buffer)
-      if (!parsed || String(parsed).trim().length < 250) {
-        const ocrText = await ocrThenExtract(buffer)
-        return String(ocrText).slice(0, 4000)
+      if (parsed && String(parsed).trim().length >= 50) {
+        return String(parsed).slice(0, 7000)
       }
-      return String(parsed).slice(0, 7000)
+      try {
+        const ocrText = await ocrThenExtract(buffer)
+        if (ocrText) return String(ocrText).slice(0, 7000)
+      } catch {
+        // OCR tools not available in this environment
+      }
+      return parsed ? String(parsed).slice(0, 7000) : null
     }
 
     if (type === 'text/plain') {
@@ -166,9 +171,10 @@ async function parsePdf(buffer: Buffer) {
   try {
     const pdfParse = (await import('pdf-parse')) as any
     const parser = pdfParse.default || pdfParse
-    const result = await parser({ data: buffer })
+    const result = await parser(buffer)
     return result.text
-  } catch {
+  } catch (err) {
+    console.warn('[parsePdf] failed:', err)
     return ''
   }
 }
