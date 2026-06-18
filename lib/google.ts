@@ -129,12 +129,12 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
     const { id, type, name } = file
     if (type === 'application/vnd.google-apps.document') {
       const res = await driveClient.files.export({ fileId: id, mimeType: 'text/plain' }, { responseType: 'text' })
-      return String(res.data).slice(0, 4000)
+      return String(res.data).slice(0, 7000)
     }
 
     if (type === 'application/vnd.google-apps.spreadsheet') {
       const res = await driveClient.files.export({ fileId: id, mimeType: 'text/csv' }, { responseType: 'text' })
-      return String(res.data).slice(0, 4000)
+      return String(res.data).slice(0, 7000)
     }
 
     if (type === 'application/pdf') {
@@ -145,12 +145,12 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
         const ocrText = await ocrThenExtract(buffer)
         return String(ocrText).slice(0, 4000)
       }
-      return String(parsed).slice(0, 4000)
+      return String(parsed).slice(0, 7000)
     }
 
     if (type === 'text/plain') {
       const res = await driveClient.files.get({ fileId: id, alt: 'media' }, { responseType: 'text' })
-      return String(res.data).slice(0, 4000)
+      return String(res.data).slice(0, 7000)
     }
 
     return null

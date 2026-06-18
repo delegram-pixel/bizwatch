@@ -50,6 +50,8 @@ export async function POST(request: Request) {
     const auth = makeOAuthClientWithTokens(user.accessToken, user.refreshToken ?? undefined)
     const { driveFiles, emails, events } = await fetchGoogleData(auth, { extractContents: true })
 
+    console.log('[analyse] drive files:', driveFiles.map((f: any) => ({ name: f.name, type: f.type, hasContent: !!f.content, contentLength: f.content?.length ?? 0 })))
+
     const dataContext = JSON.stringify({ driveFiles, emails, events }, null, 2)
     const anthropic = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY })
     const message = await anthropic.messages.create({
