@@ -19,18 +19,18 @@ function StatCard({ icon: Icon, label, value, badge, color = '#7C3AED' }: {
   color?: string
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-[var(--surface)] p-5 flex flex-col gap-3">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 flex flex-col gap-3">
       <div className="flex items-start justify-between gap-2">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${color}20` }}>
-          <Icon size={18} style={{ color }} />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${color}15` }}>
+          <Icon size={15} style={{ color }} />
         </div>
         {badge && (
-          <span className="text-[10px] font-mono text-slate-500 bg-white/5 px-2 py-0.5 rounded-full">{badge}</span>
+          <span className="text-[10px] text-slate-400 font-mono leading-tight text-right">{badge}</span>
         )}
       </div>
       <div>
-        <p className="text-2xl font-bold text-black font-mono">{value}</p>
-        <p className="text-xs text-slate-600 mt-0.5">{label}</p>
+        <p className="text-xl font-semibold text-slate-900 font-mono leading-none">{value}</p>
+        <p className="text-[11px] text-slate-500 mt-1">{label}</p>
       </div>
     </div>
   )
@@ -60,52 +60,61 @@ export default function Analytics() {
   const connectedCount = Object.values(connectedSources).filter(Boolean).length
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 py-6 px-0">
-      <div className="flex items-start justify-between gap-4">
+    <div className="mx-auto max-w-6xl flex flex-col gap-5 py-2">
+
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-black">Dashboard</h1>
-          <p className="text-sm text-slate-600 mt-0.5">Overview — real-time business intelligence</p>
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">Dashboard</h1>
+          <p className="text-[13px] text-slate-500 mt-0.5">Real-time business intelligence</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {lastUpdated && (
-            <span className="text-xs text-slate-500 hidden sm:block">{timeAgo(lastUpdated)}</span>
+            <span className="text-[11px] text-slate-400 hidden sm:block">{timeAgo(lastUpdated)}</span>
           )}
           <button
             type="button"
             onClick={() => analyse(true)}
             disabled={loading}
-            className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-xl border border-slate-200 bg-[var(--surface)] text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-1.5 text-[13px] font-medium px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors disabled:opacity-50"
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-            Refresh All
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+            <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
       </div>
 
+      {/* Connection status */}
       <ConnectionStatus sources={connectedSources} lastUpdated={lastUpdated} onRefresh={() => analyse(true)} loading={loading} />
 
+      {/* Stat cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <StatCard icon={BarChart2} label="Connected sources" value={connectedCount} badge="All time" color="#7C3AED" />
-        <StatCard icon={Lightbulb} label="Insights found" value={loading ? '—' : insightCount} badge={insightCount > 0 ? `Today ↑ ${insightCount}` : undefined} color="#4A9EFF" />
+        <StatCard icon={Lightbulb} label="Insights found" value={loading ? '—' : insightCount} badge={insightCount > 0 ? `↑ ${insightCount} today` : undefined} color="#4A9EFF" />
         <StatCard icon={Bell} label="Active alerts" value={loading ? '—' : alertCount} color="#FF4757" />
-        <StatCard icon={TrendingUp} label="Predictions" value={loading ? '—' : predCount} color="#00E87A" />
+        <StatCard icon={TrendingUp} label="Predictions" value={loading ? '—' : predCount} color="#10b981" />
       </div>
 
+      {/* Error */}
       {error && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-400">{error}</div>
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-600">{error}</div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-col-3 gap-5">
-        <div className="rounded-2xl border border-slate-200 bg-[var(--surface)] p-5">
+      {/* Insights + Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
           <InsightPanel insights={data?.insights} loading={loading} />
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-[var(--surface)] p-5">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
           <AlertPanel alerts={data?.alerts} loading={loading} />
         </div>
       </div>
-      <div className="rounded-2xl border border-slate-200 bg-[var(--surface)] p-5">
+
+      {/* Predictions */}
+      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
         <PredictionPanel predictions={data?.predictions} loading={loading} />
       </div>
+
     </div>
   )
 }

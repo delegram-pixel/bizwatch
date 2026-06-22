@@ -1,33 +1,26 @@
 'use client'
 
-import React from 'react'
-import { Funnel, Search } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Search, SlidersHorizontal } from 'lucide-react'
 
 export default function HistorySearch({ value, onChange, onFilter }) {
   return (
-    <div className="grid gap-4 sm:flex sm:items-center sm:justify-between">
-      <div className="relative min-w-0 flex-1">
-        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
-          <Search size={16} />
-        </span>
-        <Input
+    <div className="flex items-center gap-2">
+      <div className="relative flex-1 min-w-0">
+        <Search size={14} className="pointer-events-none absolute inset-y-0 left-3 my-auto text-slate-400" />
+        <input
           value={value}
           onChange={onChange}
           placeholder="Search past conversations..."
-          className="pl-9 rounded-3xl border-slate-200 h-10"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-[13px] text-slate-800 placeholder:text-slate-400 outline-none focus:border-violet-500 transition-colors"
         />
       </div>
-      <Button
-        variant="secondary"
-        size="lg"
-        className="w-full justify-center sm:w-auto"
+      <button
         onClick={onFilter}
+        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] font-medium text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-colors whitespace-nowrap"
       >
-        <Funnel size={16} />
-        Filter
-      </Button>
+        <SlidersHorizontal size={13} />
+        <span className="hidden sm:inline">Filter</span>
+      </button>
     </div>
   )
 }

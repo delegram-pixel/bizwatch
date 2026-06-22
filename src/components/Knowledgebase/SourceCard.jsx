@@ -1,31 +1,39 @@
 'use client'
 
 import React from 'react'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 
 export default function SourceCard({ icon: Icon, title, description, status, accent }) {
   const isConnected = accent === 'connected'
 
   return (
-    <Card className="group h-full border border-slate-200 ring-0 shadow-none hover:border-slate-300 transition-colors overflow-hidden">
-      <CardContent className="flex flex-col p-8">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-violet-600 shadow-[0_20px_45px_-30px_rgba(124,58,237,0.18)]">
-            <Icon size={24} />
-          </div>
-          <Badge
-            variant={isConnected ? 'secondary' : 'outline'}
-            className={isConnected ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/25' : ''}
-          >
-            {status}
-          </Badge>
+    <div className={`flex flex-col gap-4 rounded-xl border p-4 transition-colors ${
+      isConnected
+        ? 'border-slate-200 bg-white hover:border-slate-300'
+        : 'border-slate-200 bg-slate-50 hover:border-slate-300'
+    }`}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600 shrink-0">
+          <Icon size={16} />
         </div>
-        <div className="mt-6 space-y-3">
-          <h3 className="text-lg font-semibold text-black">{title}</h3>
-          <p className="text-sm leading-6 text-slate-600">{description}</p>
-        </div>
-      </CardContent>
-    </Card>
+        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${
+          isConnected
+            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+            : 'bg-slate-100 text-slate-500 border border-slate-200'
+        }`}>
+          {status}
+        </span>
+      </div>
+
+      <div className="flex-1">
+        <h3 className="text-[13px] font-semibold text-slate-900">{title}</h3>
+        <p className="text-[12px] text-slate-500 mt-0.5 leading-relaxed">{description}</p>
+      </div>
+
+      {!isConnected && (
+        <button className="w-full rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[12px] font-medium text-slate-600 hover:border-violet-300 hover:text-violet-600 transition-colors">
+          Connect
+        </button>
+      )}
+    </div>
   )
 }

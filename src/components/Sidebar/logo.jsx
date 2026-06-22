@@ -4,13 +4,13 @@ import React from 'react'
 
 export default function Logo() {
   return (
-    <div className="flex items-start gap-4">
-      <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-indigo-600 text-lg font-bold text-white shadow-lg shadow-violet-500/20">
+    <div className="flex items-center gap-3">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 text-[11px] font-bold text-white">
         BW
       </div>
-      <div className="space-y-1">
-        <p className="text-sm font-semibold text-slate-950">BizWatch AI</p>
-        <p className="text-xs text-slate-500">Business Intelligence</p>
+      <div>
+        <p className="text-[13px] font-semibold text-slate-900 leading-tight">BizWatch AI</p>
+        <p className="text-[11px] text-slate-400 leading-tight">Business Intelligence</p>
       </div>
     </div>
   )

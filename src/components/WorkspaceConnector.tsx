@@ -106,7 +106,7 @@ export default function WorkspaceConnector({
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] py-12 bg-[var(--surface)]">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] py-12 bg-white">
 
       {/* BizWatch brand header */}
       <div className="text-center mb-8 space-y-1.5">
@@ -122,7 +122,7 @@ export default function WorkspaceConnector({
       <Card className="w-full max-w-[22rem] border border-slate-200 ring-0 shadow-none sm:max-w-md">
         <CardContent className="p-7 sm:p-8">
           {error && (
-            <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-400">
+            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
             </div>
           )}
@@ -143,9 +143,9 @@ export default function WorkspaceConnector({
             {INTEGRATIONS.map(({ id, label, icon }) => (
               <div
                 key={id}
-                className="flex items-center gap-3.5 px-4 py-3.5 bg-[var(--surface)]"
+                className="flex items-center gap-3.5 px-4 py-3.5 bg-white"
               >
-                <div className="w-8 h-8 flex items-center justify-center shrink-0 rounded-2xl bg-white shadow-sm">
+                <div className="w-8 h-8 flex items-center justify-center shrink-0 rounded-lg bg-slate-50 border border-slate-200">
                   <Icon icon={icon} width={26} height={26} />
                 </div>
                 <span className="flex-1 text-[13px] font-medium text-slate-900">
@@ -160,7 +160,7 @@ export default function WorkspaceConnector({
           <Button
             onClick={handleConnect}
             disabled={globalLoading || allConnected}
-            className="w-full rounded-xl py-3.5 h-auto text-[13px] font-semibold text-white bg-violet-600 hover:bg-violet-500 shadow-[0_4px_20px_-4px_rgba(124,58,237,0.35)]"
+            className="w-full rounded-xl py-3.5 h-auto text-[13px] font-semibold text-white bg-violet-600 hover:bg-violet-700 transition-colors"
           >
             {globalLoading ? (
               <Loader2 size={17} className="animate-spin" />
@@ -184,7 +184,7 @@ export default function WorkspaceConnector({
       {/* Footer nav */}
       <nav className="mt-8 flex gap-5 text-[11px] text-slate-500">
         {(['Privacy Policy', 'Terms of Service', 'Contact Support'] as const).map((link) => (
-          <a key={link} href="#" className="hover:text-slate-300 transition-colors">
+          <a key={link} href="#" className="hover:text-slate-700 transition-colors">
             {link}
           </a>
         ))}

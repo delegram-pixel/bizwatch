@@ -5,7 +5,7 @@ export  const sources = [
     
     icon: HardDrive,
     title: 'Google Drive',
-    description: 'Shared Coperate repositories.',
+    description: 'Shared corporate repositories.',
     status: 'Connected',
     accent: 'connected',
   },

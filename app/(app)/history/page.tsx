@@ -1,10 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Activity } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import SectionHeader from '@/components/SectionHeader'
+import { Activity, Download } from 'lucide-react'
 import HistorySearch from '@/components/history/HistorySearch'
 import HistorySection from '@/components/history/HistorySection'
 import { chatHistory } from '@/data/chat-history'
@@ -16,10 +13,10 @@ function resolveIconAndColor(title: string, description: string) {
   for (const rule of ICON_RULES) {
     if (rule.keywords.some((kw: string) => text.includes(kw))) {
       const Icon = rule.icon
-      return { icon: <Icon size={22} />, iconColor: rule.color }
+      return { icon: <Icon size={16} />, iconColor: rule.color }
     }
   }
-  return { icon: <Activity size={22} />, iconColor: 'bg-violet-500' }
+  return { icon: <Activity size={16} />, iconColor: 'bg-slate-400' }
 }
 
 const GROUP_ORDER = ['Today', 'Yesterday', 'This Week', 'Last Week', 'Older']
@@ -48,7 +45,7 @@ function formatTime(dateStr: string) {
 
 export default function History() {
   const [query, setQuery] = useState('')
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)
 
   const historyGroups = useMemo(() => {
     const grouped: Record<string, { id: string; icon: React.ReactNode; iconColor: string; title: string; subtitle: string; time: string }[]> = {}
@@ -60,9 +57,7 @@ export default function History() {
       updatedAt: c.updatedAt,
     }))
 
-    const allChats = [...savedChats, ...chatHistory]
-
-    for (const chat of allChats) {
+    for (const chat of [...savedChats, ...chatHistory]) {
       const group = getDateGroup(chat.updatedAt)
       if (!grouped[group]) grouped[group] = []
       const { icon, iconColor } = resolveIconAndColor(chat.title, chat.description ?? '')
@@ -81,40 +76,52 @@ export default function History() {
 
   const filteredGroups = useMemo(
     () =>
-      historyGroups.map((group) => ({
-        ...group,
-        items: group.items.filter(
-          (item) =>
-            item.title.toLowerCase().includes(query.toLowerCase()) ||
-            item.subtitle.toLowerCase().includes(query.toLowerCase()),
-        ),
-      })),
+      historyGroups
+        .map((group) => ({
+          ...group,
+          items: group.items.filter(
+            (item) =>
+              item.title.toLowerCase().includes(query.toLowerCase()) ||
+              item.subtitle.toLowerCase().includes(query.toLowerCase()),
+          ),
+        }))
+        .filter((group) => group.items.length > 0),
     [query, historyGroups],
   )
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6 px-0 py-6 sm:px-0 xl:px-0">
-      <SectionHeader
-        title="History"
-        description="Search past conversations and jump back into the most important insights from your AI workspace."
-        action={
-          <Button variant="secondary" size="lg" className="hidden sm:inline-flex">
-            Export
-          </Button>
+    <div className="mx-auto max-w-2xl w-full py-6 sm:py-8">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-xl font-semibold text-slate-900 tracking-tight">History</h1>
+          <p className="text-[13px] text-slate-500 mt-1 leading-relaxed">
+            Search past conversations and jump back into insights.
+          </p>
+        </div>
+        <button className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] font-medium text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-colors shrink-0">
+          <Download size={13} />
+          <span className="hidden sm:inline">Export</span>
+        </button>
+      </div>
 
-        }
-      />
+      {/* Search */}
+      <div className="mb-6">
+        <HistorySearch value={query} onChange={handleSearch} onFilter={() => null} />
+      </div>
 
-      <Card className="border border-slate-200 ring-0 shadow-none">
-        <CardContent className="p-6 space-y-6">
-          <HistorySearch value={query} onChange={handleSearch} onFilter={() => null} />
-          <div className="space-y-8">
-            {filteredGroups.map((group) => (
-              <HistorySection key={group.title} title={group.title} items={group.items} />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      {/* List */}
+      {filteredGroups.length > 0 ? (
+        <div className="space-y-6">
+          {filteredGroups.map((group) => (
+            <HistorySection key={group.title} title={group.title} items={group.items} />
+          ))}
+        </div>
+      ) : (
+        <div className="py-16 text-center">
+          <p className="text-[13px] text-slate-400">No conversations found.</p>
+        </div>
+      )}
     </div>
   )
 }

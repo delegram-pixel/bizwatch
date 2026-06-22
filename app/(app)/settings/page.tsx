@@ -63,11 +63,11 @@ function loadConnectedServices() {
 function Toast({ message, visible }: { message: string; visible: boolean }) {
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-950/90 px-4 py-3 text-sm text-white shadow-2xl transition-all duration-300 ${
+      className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-lg transition-all duration-300 ${
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
       }`}
     >
-      <Check size={14} className="text-green-400 shrink-0" />
+      <Check size={14} className="text-emerald-600 shrink-0" />
       {message}
     </div>
   )
@@ -83,10 +83,10 @@ function ConfirmModal({ title, description, confirmLabel, onConfirm, onCancel }:
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative z-50 w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl">
+      <div className="relative z-50 w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-xl">
         <div className="flex items-start gap-3 mb-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-500/10 mt-0.5">
-            <AlertTriangle size={16} className="text-red-400" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 mt-0.5">
+            <AlertTriangle size={16} className="text-red-600" />
           </div>
           <div>
             <h3 className="text-base font-semibold text-black">{title}</h3>
@@ -110,7 +110,7 @@ function ConfirmModal({ title, description, confirmLabel, onConfirm, onCancel }:
 
 function SectionCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-[var(--surface)] p-6">
+    <div className="rounded-xl border border-slate-200 bg-white p-6">
       <div className="mb-5">
         <h2 className="text-base font-semibold text-black">{title}</h2>
         {subtitle && <p className="mt-0.5 text-sm text-slate-600">{subtitle}</p>}
@@ -130,7 +130,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 const inputCls =
-  'w-full rounded-xl border border-slate-200 bg-[var(--surface-strong)] px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-500 outline-none transition focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10'
+  'w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-500 outline-none transition focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10'
 
 export default function Settings() {
   const { user } = useAuth()
@@ -220,8 +220,8 @@ export default function Settings() {
                 {user?.picture ? (
                   <img src={user.picture} alt={user.name} className="h-16 w-16 rounded-full object-cover ring-2 ring-slate-200" />
                 ) : (
-                  <div className="h-16 w-16 rounded-full bg-violet-600/20 ring-2 ring-violet-500/20 flex items-center justify-center">
-                    <span className="text-xl font-bold text-violet-600">{getInitials(displayName || user?.name)}</span>
+                  <div className="h-16 w-16 rounded-full bg-slate-100 ring-2 ring-slate-200 flex items-center justify-center">
+                    <span className="text-xl font-bold text-slate-700">{getInitials(displayName || user?.name)}</span>
                   </div>
                 )}
                 <button type="button" title="Change photo" className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 transition cursor-pointer">
@@ -239,7 +239,7 @@ export default function Settings() {
             </Field>
 
             <Field label="Email">
-              <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-[var(--surface-strong)] px-3.5 py-2.5">
+              <div className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5">
                 <Mail size={13} className="shrink-0 text-slate-600" />
                 <span className="flex-1 truncate text-sm text-slate-700">{user?.email || 'Connected via Google'}</span>
                 <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-600">Read-only</span>
@@ -248,7 +248,7 @@ export default function Settings() {
 
             <div className="flex justify-end">
               <div className="relative">
-                {profileDirty && <span className="absolute -right-1 -top-1 z-10 h-2.5 w-2.5 rounded-full bg-yellow-400 ring-2 ring-[#0f0d17]" />}
+                {profileDirty && <span className="absolute -right-1 -top-1 z-10 h-2.5 w-2.5 rounded-full bg-yellow-400 ring-2 ring-white" />}
                 <Button variant="default" onClick={saveProfile}>Save changes</Button>
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function Settings() {
         <SectionCard title="Connected Accounts" subtitle="Manage your Google Workspace integrations.">
           <div className="flex flex-col gap-2">
             {GOOGLE_SERVICES.map(({ id, name, Icon, description }) => (
-              <div key={id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-[var(--surface-strong)] px-4 py-3">
+              <div key={id} className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white">
                   <Icon size={15} className="text-slate-600" />
                 </div>
@@ -266,10 +266,10 @@ export default function Settings() {
                   <p className="text-sm font-medium text-black">{name}</p>
                   <p className="truncate text-xs text-slate-600">{description}</p>
                 </div>
-                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${connected[id] ? 'bg-green-500/10 text-green-400' : 'bg-white/5 text-slate-500'}`}>
+                <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium border ${connected[id] ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                   {connected[id] ? 'Connected' : 'Not connected'}
                 </span>
-                <Button variant={connected[id] ? 'outline' : 'default'} size="sm" onClick={() => toggleService(id)} className={`shrink-0 !px-3 !py-1.5 text-xs ${connected[id] ? '!text-red-400 hover:!border-red-500/30 hover:!bg-red-500/5' : ''}`}>
+                <Button variant={connected[id] ? 'outline' : 'default'} size="sm" onClick={() => toggleService(id)} className={`shrink-0 !px-3 !py-1.5 text-xs ${connected[id] ? '!text-red-600 hover:!border-red-300 hover:!bg-red-50' : ''}`}>
                   {connected[id] ? 'Disconnect' : 'Connect'}
                 </Button>
               </div>
@@ -316,18 +316,18 @@ export default function Settings() {
               </div>
             </Field>
             <Field label="Insight sensitivity">
-              <div className="flex w-fit rounded-xl border border-slate-200 bg-[var(--surface-strong)] p-1">
+              <div className="flex w-fit rounded-xl border border-slate-200 bg-slate-50 p-1">
                 {['Low', 'Medium', 'High'].map((level) => (
-                  <button key={level} type="button" onClick={() => updatePref('insightSensitivity', level)} className={`rounded-lg px-4 py-1.5 text-sm font-medium transition cursor-pointer ${aiPrefs.insightSensitivity === level ? 'bg-violet-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}>
+                  <button key={level} type="button" onClick={() => updatePref('insightSensitivity', level)} className={`rounded-lg px-4 py-1.5 text-sm font-medium transition cursor-pointer ${aiPrefs.insightSensitivity === level ? 'bg-violet-600 text-white' : 'text-slate-500 hover:text-slate-900'}`}>
                     {level}
                   </button>
                 ))}
               </div>
             </Field>
             <Field label="Response style">
-              <div className="flex w-fit rounded-xl border border-slate-200 bg-[var(--surface-strong)] p-1">
+              <div className="flex w-fit rounded-xl border border-slate-200 bg-slate-50 p-1">
                 {['Analytical', 'Conversational'].map((style) => (
-                  <button key={style} type="button" onClick={() => updatePref('responseStyle', style)} className={`rounded-lg px-4 py-1.5 text-sm font-medium transition cursor-pointer ${aiPrefs.responseStyle === style ? 'bg-violet-600 text-white' : 'text-slate-500 hover:text-slate-300'}`}>
+                  <button key={style} type="button" onClick={() => updatePref('responseStyle', style)} className={`rounded-lg px-4 py-1.5 text-sm font-medium transition cursor-pointer ${aiPrefs.responseStyle === style ? 'bg-violet-600 text-white' : 'text-slate-500 hover:text-slate-900'}`}>
                     {style}
                   </button>
                 ))}
@@ -341,8 +341,8 @@ export default function Settings() {
 
         <SectionCard title="Data & Privacy" subtitle="Control your stored data and account.">
           <div className="flex flex-col gap-4">
-            <div className="flex gap-3 rounded-xl border border-blue-500/10 bg-blue-500/5 px-4 py-3">
-              <Info size={14} className="mt-0.5 shrink-0 text-blue-400" />
+            <div className="flex gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+              <Info size={14} className="mt-0.5 shrink-0 text-blue-600" />
               <p className="text-xs leading-relaxed text-slate-600">
                 BizWatch only requests <span className="font-medium text-slate-900">read-only access</span> to your Google Workspace. We never modify or delete your data.
               </p>
@@ -358,7 +358,7 @@ export default function Settings() {
                     <p className="text-sm font-medium text-black">{label}</p>
                     <p className="mt-0.5 text-xs text-slate-500">{desc}</p>
                   </div>
-                  <Button variant="outline" onClick={() => setModal(m)} className="shrink-0 !border-red-500/20 !text-red-400 hover:!bg-red-500/5 hover:!border-red-500/30">
+                  <Button variant="outline" onClick={() => setModal(m)} className="shrink-0 !border-red-200 !text-red-600 hover:!bg-red-50 hover:!border-red-300">
                     <Icon size={13} />{action}
                   </Button>
                 </div>

@@ -1,19 +1,16 @@
 'use client'
 
-import React from 'react'
 import HistoryItem from './HistoryItem'
 
 export default function HistorySection({ title, items }) {
-  if (!items.length) {
-    return null
-  }
+  if (!items.length) return null
 
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between gap-4 border-b border-slate-200 pb-3">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-700">{title}</h2>
-      </div>
-      <div className="space-y-3">
+    <section>
+      <p className="text-[11px] font-medium uppercase tracking-widest text-slate-400 mb-1 px-3">
+        {title}
+      </p>
+      <div className="divide-y divide-slate-100">
         {items.map((item) => (
           <HistoryItem key={item.id} {...item} />
         ))}

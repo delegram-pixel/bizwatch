@@ -10,30 +10,30 @@ import { saveChat, loadChat } from '@/services/chatStorage'
 
 const INSIGHT_STYLES: Record<string, { wrapper: string; badge: string; dot: string }> = {
   opportunity: {
-    wrapper: 'bg-green-500/10 border-green-500/20',
-    badge: 'bg-green-500/20 text-green-400',
-    dot: 'bg-green-400',
+    wrapper: 'bg-emerald-50 border-emerald-200',
+    badge: 'bg-emerald-100 text-emerald-700',
+    dot: 'bg-emerald-500',
   },
   risk: {
-    wrapper: 'bg-amber-500/10 border-amber-500/20',
-    badge: 'bg-amber-500/20 text-amber-400',
-    dot: 'bg-amber-400',
+    wrapper: 'bg-amber-50 border-amber-200',
+    badge: 'bg-amber-100 text-amber-700',
+    dot: 'bg-amber-500',
   },
   warning: {
-    wrapper: 'bg-red-500/10 border-red-500/20',
-    badge: 'bg-red-500/20 text-red-400',
-    dot: 'bg-red-400',
+    wrapper: 'bg-red-50 border-red-200',
+    badge: 'bg-red-100 text-red-700',
+    dot: 'bg-red-500',
   },
   info: {
-    wrapper: 'bg-blue-500/10 border-blue-500/20',
-    badge: 'bg-blue-500/20 text-blue-400',
-    dot: 'bg-blue-400',
+    wrapper: 'bg-blue-50 border-blue-200',
+    badge: 'bg-blue-100 text-blue-700',
+    dot: 'bg-blue-500',
   },
 }
 
 const DEFAULT_INSIGHT_STYLE = {
-  wrapper: 'bg-slate-500/10 border-slate-500/20',
-  badge: 'bg-slate-500/20 text-slate-400',
+  wrapper: 'bg-slate-50 border-slate-200',
+  badge: 'bg-slate-100 text-slate-600',
   dot: 'bg-slate-400',
 }
 
@@ -53,7 +53,7 @@ interface Message {
 function InsightCard({ insight }: { insight: Insight }) {
   const s = INSIGHT_STYLES[insight.type] ?? DEFAULT_INSIGHT_STYLE
   return (
-    <div className={`rounded-xl border p-3 ${s.wrapper} border-slate-200 bg-[var(--surface-strong)]`}>
+    <div className={`rounded-xl border p-3 ${s.wrapper}`}>
       <div className="flex items-center gap-2 mb-2">
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${s.dot}`} />
         <span className={`text-[10px] font-semibold uppercase tracking-widest px-1.5 py-0.5 rounded ${s.badge}`}>
@@ -69,7 +69,7 @@ function InsightCard({ insight }: { insight: Insight }) {
 function UserMessage({ content }: { content: string }) {
   return (
     <div className="flex justify-end">
-      <div className="max-w-sm rounded-2xl rounded-tr-sm bg-slate-100 px-4 py-3 text-sm text-black leading-relaxed border border-slate-200">
+      <div className="max-w-sm rounded-xl rounded-tr-sm bg-slate-100 px-4 py-3 text-sm text-black leading-relaxed border border-slate-200">
         {content}
       </div>
     </div>
@@ -84,7 +84,7 @@ function AssistantMessage({ content, insights, error }: { content: string | null
   }
 
   return (
-    <div className="flex items-start gap-3 group rounded-3xl border border-slate-200 bg-[var(--surface-strong)] p-4">
+    <div className="flex items-start gap-3 group rounded-xl border border-slate-200 bg-white p-4">
       <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 mt-0.5">
         <BarChart2 size={14} className="text-violet-600" />
       </div>
@@ -141,10 +141,10 @@ function ThinkingBubble() {
       <div className="w-8 h-8 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
         <BarChart2 size={14} className="text-violet-600" />
       </div>
-      <div className="flex items-center gap-1.5 px-3 py-2.5 rounded-2xl bg-[var(--surface-strong)] border border-slate-200">
-        <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:0ms]" />
-        <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:150ms]" />
-        <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce [animation-delay:300ms]" />
+      <div className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200">
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:0ms]" />
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:150ms]" />
+        <span className="w-1.5 h-1.5 rounded-full bg-slate-400 animate-bounce [animation-delay:300ms]" />
       </div>
     </div>
   )
@@ -243,8 +243,8 @@ export default function ChatPage() {
   }, [messages, loading])
 
   return (
-    <div className="flex flex-col h-full overflow-hidden -mx-6 -my-6 sm:-mx-8 xl:-mx-10">
-      <div className="shrink-0 flex items-center gap-3 px-6 sm:px-8 xl:px-10 py-4 border-b border-slate-200 bg-[var(--surface-strong)]">
+    <div className="flex flex-col h-full overflow-hidden -mx-4 -my-5 sm:-mx-6 sm:-my-6 lg:-mx-8 xl:-mx-10">
+      <div className="shrink-0 flex items-center gap-3 px-4 sm:px-6 lg:px-8 xl:px-10 py-4 border-b border-slate-200 bg-white">
         <button
           type="button"
           onClick={() => router.push('/new-chat')}
@@ -259,7 +259,7 @@ export default function ChatPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-none">
-        <div className="max-w-2xl mx-auto w-full px-6 sm:px-8 pt-8 pb-6 space-y-6">
+        <div className="max-w-2xl mx-auto w-full px-6 pt-8 pb-6 space-y-6">
           {messages.map((msg, i) =>
             msg.role === 'user' ? (
               <UserMessage key={i} content={msg.content as string} />
@@ -272,9 +272,9 @@ export default function ChatPage() {
         </div>
       </div>
 
-      <div className="shrink-0 border-t border-slate-200 bg-[var(--surface)]">
-        <div className="max-w-2xl mx-auto px-6 sm:px-8 py-4">
-          <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-[var(--surface-strong)] px-4 py-3 focus-within:border-violet-400/40 focus-within:ring-2 focus-within:ring-violet-500/10 transition">
+      <div className="shrink-0 border-t border-slate-200 bg-white">
+        <div className="max-w-2xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 focus-within:border-violet-500 transition">
             <button type="button" className="shrink-0 text-slate-600 hover:text-slate-900 transition pb-0.5">
               <Paperclip size={18} />
             </button>
@@ -292,14 +292,14 @@ export default function ChatPage() {
             />
             <div className="flex items-center gap-2 shrink-0">
               <span className="hidden sm:flex items-center gap-1 text-[10px] text-slate-500 font-mono">
-                <kbd className="px-1.5 py-0.5 rounded bg-white/10">⌘</kbd>
+                <kbd className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">⌘</kbd>
                 ENTER
               </span>
               <button
                 type="button"
                 onClick={handleSend}
                 disabled={!input.trim() || loading}
-                className="w-9 h-9 flex items-center justify-center rounded-xl bg-violet-600 text-white disabled:opacity-40 hover:bg-violet-500 transition shadow-[0_4px_16px_-4px_rgba(124,58,237,0.6)]"
+                className="w-9 h-9 flex items-center justify-center rounded-xl bg-violet-600 text-white disabled:opacity-40 hover:bg-violet-700 transition"
               >
                 <Send size={15} />
               </button>
