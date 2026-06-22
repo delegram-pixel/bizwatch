@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { BarChart2, AlertCircle, Users, DollarSign, ArrowRight } from 'lucide-react'
 
 const problems = [
@@ -159,7 +160,10 @@ export default function Landing() {
           </div>
           <span className="text-xs font-semibold text-slate-500">BizWatch</span>
         </div>
-        <p className="text-xs text-slate-400">© 2025 BizWatch. All rights reserved.</p>
+        <div className="flex items-center gap-4">
+          <Link href="/privacy" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">Privacy Policy</Link>
+          <p className="text-xs text-slate-400">© 2025 BizWatch. All rights reserved.</p>
+        </div>
       </footer>
 
     </div>
