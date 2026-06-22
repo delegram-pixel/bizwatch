@@ -15,6 +15,10 @@ const EXTRACTABLE_TYPES = new Set([
   'application/vnd.google-apps.document',
   'application/vnd.google-apps.spreadsheet',
   'text/plain',
+  'image/heif',
+  'image/heic',
+  'image/jpeg',
+  'image/png',
 ])
 
 const FILE_REQUEST_PATTERN = /\b(read|open|summarize|summarise|what(\'s| is) in| does .+ say|contents? of|extract|show me|analyse|analyze)\b/i
@@ -75,11 +79,20 @@ export async function fetchGoogleData(auth: any, options: { extractContents?: bo
 
   if (options.extractContents) {
     const query = options.targetFileName?.toLowerCase() ?? ''
-    const candidates = rawFiles.filter((f: any) => EXTRACTABLE_TYPES.has(f.mimeType))
+    // Merge top-50 files with the dedicated extractable query, deduplicating by id
+    const priorityFiles = extractableRes.status === 'fulfilled' ? extractableRes.value.data.files ?? [] : []
+    const seen = new Set<string>()
+    const allCandidates: any[] = []
+    for (const f of [...priorityFiles, ...rawFiles]) {
+      if (!seen.has(f.id) && EXTRACTABLE_TYPES.has(f.mimeType)) {
+        seen.add(f.id)
+        allCandidates.push(f)
+      }
+    }
     const nameMatches = query
-      ? candidates.filter((f: any) => f.name.toLowerCase().includes(query) || query.includes(f.name.toLowerCase())).slice(0, 2)
+      ? allCandidates.filter((f: any) => f.name.toLowerCase().includes(query) || query.includes(f.name.toLowerCase())).slice(0, 2)
       : []
-    const extractable = nameMatches.length > 0 ? nameMatches : candidates.slice(0, 5)
+    const extractable = nameMatches.length > 0 ? nameMatches : allCandidates.slice(0, 10)
 
     const contentResults = await Promise.allSettled(
       extractable.map((f: any) => extractFileContent(driveClient, { id: f.id, type: f.mimeType, name: f.name }))
@@ -179,6 +192,21 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
     if (type === 'text/plain') {
       const res = await driveClient.files.get({ fileId: id, alt: 'media' }, { responseType: 'text' })
       return String(res.data).slice(0, 7000)
+    }
+
+    if (type === 'image/heif' || type === 'image/heic' || type === 'image/jpeg' || type === 'image/png') {
+      try {
+        const res = await driveClient.files.get({ fileId: id, alt: 'media' }, { responseType: 'arraybuffer' })
+        const buffer = Buffer.isBuffer(res.data) ? res.data : Buffer.from(res.data)
+        const vision = await import('@google-cloud/vision')
+        const client = new vision.ImageAnnotatorClient()
+        const [result] = await client.documentTextDetection({ image: { content: buffer } })
+        const text = result.fullTextAnnotation?.text ?? ''
+        if (text.trim().length >= 20) return `[Image: ${name}]\n${text.slice(0, 7000)}`
+      } catch (err) {
+        console.warn('[vision] image OCR failed for', name, ':', (err as Error).message)
+      }
+      return null
     }
 
     return null

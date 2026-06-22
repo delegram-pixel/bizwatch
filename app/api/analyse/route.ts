@@ -74,6 +74,9 @@ export async function POST(request: Request) {
     const raw = String((message.content?.[0] as any)?.text ?? '{}')
     const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
     const result = JSON.parse(cleaned)
+
+    await prisma.analysis.create({ data: { userId: session.userId, result } })
+
     return NextResponse.json(result)
   } catch (err: any) {
     console.error('POST /api/analyse error:', err)
