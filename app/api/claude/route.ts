@@ -26,12 +26,23 @@ export async function POST(request: Request) {
         const auth = makeOAuthClientWithTokens(user.accessToken, user.refreshToken ?? undefined)
         const lastUserMessage = [...messages].reverse().find((m: any) => m.role === 'user')?.content ?? ''
         const wantsFileContent = isFileContentRequest(lastUserMessage)
-        const { driveFiles, emails, events } = await fetchGoogleData(auth, {
+        const { driveFiles, emails, events, sheets } = await fetchGoogleData(auth, {
           extractContents: wantsFileContent,
           targetFileName: wantsFileContent ? lastUserMessage : undefined,
         })
-        const dataContext = JSON.stringify({ driveFiles, emails, events }, null, 2)
-        enrichedSystem = `${system || ''}\n\n---\n\nLIVE WORKSPACE DATA (as of ${new Date().toISOString()}):\n${dataContext}`
+
+        const lastAnalysis = await prisma.analysis.findFirst({
+          where: { userId: session.userId },
+          orderBy: { createdAt: 'desc' },
+          select: { result: true, createdAt: true },
+        })
+
+        const dataContext = JSON.stringify({ driveFiles, emails, events, sheets }, null, 2)
+        const analysisContext = lastAnalysis
+          ? `\n\nLAST ANALYSIS (${lastAnalysis.createdAt.toISOString()}):\n${JSON.stringify(lastAnalysis.result, null, 2)}`
+          : ''
+
+        enrichedSystem = `${system || ''}\n\n---\n\nLIVE WORKSPACE DATA (as of ${new Date().toISOString()}):\n${dataContext}${analysisContext}`
       } catch (err: any) {
         if (err.message?.includes('invalid_grant')) {
           return NextResponse.json({ error: 'Google authentication expired. Please reconnect your account.', code: 'AUTH_EXPIRED' }, { status: 401 })

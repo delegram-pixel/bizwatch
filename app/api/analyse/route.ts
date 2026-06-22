@@ -76,10 +76,43 @@ export async function POST(request: Request) {
     const result = JSON.parse(cleaned)
 
     await prisma.analysis.create({ data: { userId: session.userId, result } })
+    await extractAndSaveInvoices(session.userId, result)
 
     return NextResponse.json(result)
   } catch (err: any) {
     console.error('POST /api/analyse error:', err)
     return NextResponse.json({ error: 'Analysis failed. Please try again.' }, { status: 500 })
+  }
+}
+
+async function extractAndSaveInvoices(userId: string, result: any) {
+  try {
+    const alerts: any[] = result?.alerts?.alerts ?? []
+    const invoiceAlerts = alerts.filter((a: any) => a.type === 'overdue_payment' && a.client_or_entity)
+
+    for (const alert of invoiceAlerts) {
+      const amountMatch = alert.detail?.match(/[₦$€£][\d,]+(\.\d+)?/) ?? alert.source_quote?.match(/[₦$€£][\d,]+(\.\d+)?/)
+      const amount = amountMatch ? parseFloat(amountMatch[0].replace(/[₦$€£,]/g, '')) : 0
+      const dueDateMatch = alert.deadline ?? null
+      const reference = alert.id ?? `${userId}-${alert.client_or_entity}-${Date.now()}`
+
+      if (!amount) continue
+
+      await prisma.invoice.upsert({
+        where: { userId_reference: { userId, reference } },
+        update: { status: 'unpaid', dueDate: dueDateMatch ? new Date(dueDateMatch) : undefined },
+        create: {
+          userId,
+          reference,
+          client: alert.client_or_entity,
+          amount,
+          dueDate: dueDateMatch ? new Date(dueDateMatch) : undefined,
+          status: 'unpaid',
+          sourceFile: alert.source_file ?? null,
+        },
+      })
+    }
+  } catch (err: any) {
+    console.warn('[invoices] extraction failed:', err.message)
   }
 }

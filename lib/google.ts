@@ -84,7 +84,7 @@ export async function fetchGoogleData(auth: any, options: { extractContents?: bo
     const seen = new Set<string>()
     const allCandidates: any[] = []
     for (const f of [...priorityFiles, ...rawFiles]) {
-      if (!seen.has(f.id) && EXTRACTABLE_TYPES.has(f.mimeType)) {
+      if (f.id && f.mimeType && !seen.has(f.id) && EXTRACTABLE_TYPES.has(f.mimeType)) {
         seen.add(f.id)
         allCandidates.push(f)
       }
