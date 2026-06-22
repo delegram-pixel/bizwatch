@@ -25,10 +25,9 @@ export async function POST(request: Request) {
       try {
         const auth = makeOAuthClientWithTokens(user.accessToken, user.refreshToken ?? undefined)
         const lastUserMessage = [...messages].reverse().find((m: any) => m.role === 'user')?.content ?? ''
-        const wantsFileContent = isFileContentRequest(lastUserMessage)
         const { driveFiles, emails, events, sheets } = await fetchGoogleData(auth, {
-          extractContents: wantsFileContent,
-          targetFileName: wantsFileContent ? lastUserMessage : undefined,
+          extractContents: true,
+          targetFileName: isFileContentRequest(lastUserMessage) ? lastUserMessage : undefined,
         })
 
         const lastAnalysis = await prisma.analysis.findFirst({
