@@ -40,6 +40,18 @@ model Analysis {
   @@index([userId, createdAt])
 }
 
+model DriveFile {
+  id              String   @id @default(cuid())
+  userId          String
+  driveFileId     String
+  anthropicFileId String
+  driveModifiedAt DateTime
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, driveFileId])
+  @@index([userId])
+}
+
 model Invoice {
   id          String    @id @default(cuid())
   userId      String

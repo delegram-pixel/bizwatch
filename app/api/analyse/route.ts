@@ -12,19 +12,19 @@ You will receive raw data from the user's Google Workspace. Analyse it and retur
   "insights": {
     "summary": "<2-3 sentence executive summary>",
     "insights": [
-      { "id": "ins_001", "type": "financial|communication|client|operational", "title": "<short title>", "detail": "<1-2 specific sentences>", "severity": "critical|warning|info", "source": "drive|gmail|sheets|calendar", "timestamp": "<ISO timestamp>", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim sentence or phrase from the document content that supports this insight, or null>" }
+      { "id": "ins_001", "type": "financial|communication|client|operational", "title": "<short title>", "detail": "<1-2 specific sentences>", "severity": "critical|warning|info", "source": "drive|gmail|sheets|calendar", "timestamp": "<ISO timestamp>", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim phrase (max 100 chars) from the document that supports this insight, or null>" }
     ]
   },
   "predictions": {
     "outlook": "positive|cautious|negative",
     "predictions": [
-      { "id": "pred_001", "type": "cashflow|workload|churn|growth", "title": "<short title>", "detail": "<specific forecast>", "confidence": "high|medium|low", "timeframe": "<e.g. 2 weeks>", "recommended_action": "<concrete action>", "source": "drive|gmail|sheets|calendar", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim sentence or phrase from the document content that supports this prediction, or null>" }
+      { "id": "pred_001", "type": "cashflow|workload|churn|growth", "title": "<short title>", "detail": "<specific forecast>", "confidence": "high|medium|low", "timeframe": "<e.g. 2 weeks>", "recommended_action": "<concrete action>", "source": "drive|gmail|sheets|calendar", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim phrase (max 100 chars) from the document that supports this prediction, or null>" }
     ]
   },
   "alerts": {
     "unread_count": <number>,
     "alerts": [
-      { "id": "alert_001", "type": "churn_risk|contract_expiry|overdue_payment|deadline", "title": "<short title>", "detail": "<specific detail>", "urgency": "critical|high|medium", "action_required": "<concrete action>", "deadline": "<ISO timestamp or null>", "source": "drive|gmail|sheets|calendar", "client_or_entity": "<name or null>", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim sentence or phrase from the document content that supports this alert, or null>" }
+      { "id": "alert_001", "type": "churn_risk|contract_expiry|overdue_payment|deadline", "title": "<short title>", "detail": "<specific detail>", "urgency": "critical|high|medium", "action_required": "<concrete action>", "deadline": "<ISO timestamp or null>", "source": "drive|gmail|sheets|calendar", "client_or_entity": "<name or null>", "source_file": "<exact file name from driveFiles or null>", "source_quote": "<verbatim phrase (max 100 chars) from the document that supports this alert, or null>" }
     ]
   }
 }
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     const anthropic = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY })
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 4096,
+      max_tokens: 8192,
       system: ANALYSE_PROMPT,
       messages: [
         {

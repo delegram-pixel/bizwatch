@@ -75,6 +75,7 @@ export async function fetchGoogleData(auth: any, options: { extractContents?: bo
 
   const rawFiles = driveRes.status === 'fulfilled' ? driveRes.value.data.files ?? [] : []
   let driveFiles = rawFiles.map((f: any) => ({ name: f.name, type: f.mimeType, modified: f.modifiedTime }))
+  const pdfDocuments: { name: string; driveFileId: string; modifiedAt: string; data: string }[] = []
 
   if (options.extractContents) {
     const query = options.targetFileName?.toLowerCase() ?? ''
@@ -99,12 +100,18 @@ export async function fetchGoogleData(auth: any, options: { extractContents?: bo
 
     driveFiles = rawFiles.map((f: any) => {
       const idx = extractable.findIndex((e: any) => e.id === f.id)
-      const content = idx !== -1 && contentResults[idx].status === 'fulfilled' ? contentResults[idx].value : null
+      const rawContent = idx !== -1 && contentResults[idx].status === 'fulfilled' ? contentResults[idx].value : null
+
+      if (rawContent && typeof rawContent === 'object' && rawContent.kind === 'pdf') {
+        pdfDocuments.push({ name: f.name, driveFileId: f.id, modifiedAt: f.modifiedTime ?? new Date().toISOString(), data: rawContent.data })
+        return { name: f.name, type: f.mimeType, modified: f.modifiedTime }
+      }
+
       return {
         name: f.name,
         type: f.mimeType,
         modified: f.modifiedTime,
-        ...(content ? { content } : {}),
+        ...(rawContent && typeof rawContent === 'string' ? { content: rawContent } : {}),
       }
     })
   }
@@ -148,7 +155,7 @@ export async function fetchGoogleData(auth: any, options: { extractContents?: bo
       : {}),
   }))
 
-  return { driveFiles, emails, events, sheets }
+  return { driveFiles, emails, events, sheets, pdfDocuments }
 }
 
 async function gmailResToPromise(gmailClient: any) {
@@ -171,21 +178,12 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
     if (type === 'application/pdf') {
       const res = await driveClient.files.get({ fileId: id, alt: 'media' }, { responseType: 'arraybuffer' })
       const buffer = Buffer.isBuffer(res.data) ? res.data : Buffer.from(res.data)
-      try {
-        const markdown = await extractWithMarkitdown(buffer)
-        if (markdown && markdown.trim().length >= 50) return markdown.slice(0, 7000)
-      } catch (err) {
-        console.error('[markitdown] failed for file:', name, '—', (err as Error).message, '| falling back to pdf-parse')
+      // 25MB cap — leaves headroom within the 32MB Anthropic request limit
+      if (buffer.length > 25 * 1024 * 1024) {
+        console.warn('[pdf] skipping oversized file for native extraction:', name, `(${Math.round(buffer.length / 1024 / 1024)}MB)`)
+        return null
       }
-      try {
-        const pdfParse = (await import('pdf-parse')) as any
-        const parser = pdfParse.default || pdfParse
-        const result = await parser(buffer)
-        return result.text ? String(result.text).slice(0, 7000) : null
-      } catch (err) {
-        console.warn('[pdf-parse] failed:', (err as Error).message)
-      }
-      return null
+      return { kind: 'pdf' as const, data: buffer.toString('base64') }
     }
 
     if (type === 'text/plain') {
@@ -217,20 +215,6 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
   }
 }
 
-async function extractWithMarkitdown(buffer: Buffer): Promise<string> {
-  const url = process.env.EXTRACT_SERVICE_URL
-  if (!url) throw new Error('EXTRACT_SERVICE_URL not set')
-  const res = await fetch(`${url}/api/extract-pdf`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/octet-stream',
-      'x-extract-secret': process.env.EXTRACT_SECRET ?? '',
-    },
-    body: buffer,
-  })
-  if (!res.ok) throw new Error(`extract-pdf service returned ${res.status}`)
-  return res.text()
-}
 
 export async function getGoogleProfile(code: string) {
   const client = makeOAuthClient()
