@@ -8,6 +8,7 @@ const { Pool } = require('pg')
 
 const authRouter = require('./routes/auth')
 const analyseRouter = require('./routes/analyse')
+const extractRouter = require('./routes/extract')
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
@@ -45,6 +46,7 @@ app.use(
 
 app.use('/auth', authRouter)
 app.use('/api', analyseRouter)
+app.use('/api', extractRouter)
 
 app.get('/health', (_, res) => res.json({ ok: true }))
 

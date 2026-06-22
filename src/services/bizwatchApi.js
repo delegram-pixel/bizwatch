@@ -92,16 +92,19 @@ export async function sendChatMessage(messages) {
   const data = await res.json()
   const raw = data.content?.[0]?.text ?? ''
 
-  // Strip markdown code fences Claude sometimes adds around JSON
-  const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
-
-  try {
-    const parsed = JSON.parse(cleaned)
-    return {
-      response: parsed.response ?? cleaned,
-      insights: Array.isArray(parsed.insights) ? parsed.insights : [],
+  // Extract the first complete JSON object from the response (Claude sometimes adds text around it)
+  const jsonMatch = raw.match(/\{[\s\S]*\}/)
+  if (jsonMatch) {
+    try {
+      const parsed = JSON.parse(jsonMatch[0])
+      return {
+        response: parsed.response ?? raw,
+        insights: Array.isArray(parsed.insights) ? parsed.insights : [],
+      }
+    } catch {
+      // fall through
     }
-  } catch {
-    return { response: cleaned, insights: [] }
   }
+
+  return { response: raw, insights: [] }
 }

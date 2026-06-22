@@ -1,5 +1,4 @@
 import { google } from 'googleapis'
-import path from 'path'
 
 export const AUTH_SCOPES = [
   'profile',
@@ -219,21 +218,18 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
 }
 
 async function extractWithMarkitdown(buffer: Buffer): Promise<string> {
-  const { spawn } = await import('child_process')
-  const script = path.join(process.cwd(), 'server', 'pdf_to_markdown.py')
-  return new Promise((resolve, reject) => {
-    const py = spawn('python3', [script])
-    const chunks: Buffer[] = []
-    py.stdout.on('data', (chunk: Buffer) => chunks.push(chunk))
-    py.stderr.on('data', (err: Buffer) => console.warn('[markitdown] stderr:', err.toString()))
-    py.on('close', (code: number | null) => {
-      if (code !== 0) return reject(new Error(`pdf_to_markdown exited with code ${code}`))
-      resolve(Buffer.concat(chunks).toString('utf8'))
-    })
-    py.on('error', reject)
-    py.stdin.write(buffer)
-    py.stdin.end()
+  const url = process.env.EXTRACT_SERVICE_URL
+  if (!url) throw new Error('EXTRACT_SERVICE_URL not set')
+  const res = await fetch(`${url}/api/extract-pdf`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      'x-extract-secret': process.env.EXTRACT_SECRET ?? '',
+    },
+    body: buffer,
   })
+  if (!res.ok) throw new Error(`extract-pdf service returned ${res.status}`)
+  return res.text()
 }
 
 export async function getGoogleProfile(code: string) {
