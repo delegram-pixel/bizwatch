@@ -1,10 +1,5 @@
 import { google } from 'googleapis'
 import path from 'path'
-import os from 'os'
-import fs from 'fs/promises'
-import { execFile } from 'child_process'
-import util from 'util'
-const execFileAsync = util.promisify(execFile)
 
 export const AUTH_SCOPES = [
   'profile',
@@ -47,9 +42,9 @@ export async function fetchGoogleData(auth: any, options: { extractContents?: bo
   const gmailClient = google.gmail({ version: 'v1', auth })
   const calendarClient = google.calendar({ version: 'v3', auth })
 
-  const [driveRes, gmailRes, calendarRes] = await Promise.allSettled([
+  const [driveRes, gmailRes, calendarRes, sheetsRes, extractableRes] = await Promise.allSettled([
     driveClient.files.list({
-      pageSize: 20,
+      pageSize: 50,
       orderBy: 'modifiedTime desc',
       fields: 'files(id,name,mimeType,modifiedTime,size)',
     }),
@@ -60,6 +55,18 @@ export async function fetchGoogleData(auth: any, options: { extractContents?: bo
       maxResults: 20,
       singleEvents: true,
       orderBy: 'startTime',
+    }),
+    driveClient.files.list({
+      pageSize: 5,
+      orderBy: 'modifiedTime desc',
+      q: "mimeType='application/vnd.google-apps.spreadsheet'",
+      fields: 'files(id,name,mimeType,modifiedTime)',
+    }),
+    driveClient.files.list({
+      pageSize: 10,
+      orderBy: 'modifiedTime desc',
+      q: "(mimeType='application/pdf' or mimeType='application/vnd.google-apps.document' or mimeType='text/plain')",
+      fields: 'files(id,name,mimeType,modifiedTime)',
     }),
   ])
 
@@ -117,7 +124,19 @@ export async function fetchGoogleData(auth: any, options: { extractContents?: bo
       ? (calendarRes.value.data.items ?? []).map((e: any) => ({ title: e.summary, start: e.start?.dateTime ?? e.start?.date, end: e.end?.dateTime ?? e.end?.date }))
       : []
 
-  return { driveFiles, emails, events }
+  const rawSheets = sheetsRes.status === 'fulfilled' ? sheetsRes.value.data.files ?? [] : []
+  const sheetContentResults = await Promise.allSettled(
+    rawSheets.map((f: any) => extractFileContent(driveClient, { id: f.id, type: f.mimeType, name: f.name }))
+  )
+  const sheets = rawSheets.map((f: any, i: number) => ({
+    name: f.name,
+    modified: f.modifiedTime,
+    ...(sheetContentResults[i].status === 'fulfilled' && sheetContentResults[i].value
+      ? { content: sheetContentResults[i].value }
+      : {}),
+  }))
+
+  return { driveFiles, emails, events, sheets }
 }
 
 async function gmailResToPromise(gmailClient: any) {
@@ -140,17 +159,21 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
     if (type === 'application/pdf') {
       const res = await driveClient.files.get({ fileId: id, alt: 'media' }, { responseType: 'arraybuffer' })
       const buffer = Buffer.isBuffer(res.data) ? res.data : Buffer.from(res.data)
-      const parsed = await parsePdf(buffer)
-      if (parsed && String(parsed).trim().length >= 50) {
-        return String(parsed).slice(0, 7000)
+      try {
+        const markdown = await extractWithMarkitdown(buffer)
+        if (markdown && markdown.trim().length >= 50) return markdown.slice(0, 7000)
+      } catch (err) {
+        console.error('[markitdown] failed for file:', name, '—', (err as Error).message, '| falling back to pdf-parse')
       }
       try {
-        const ocrText = await ocrThenExtract(buffer)
-        if (ocrText) return String(ocrText).slice(0, 7000)
-      } catch {
-        // OCR tools not available in this environment
+        const pdfParse = (await import('pdf-parse')) as any
+        const parser = pdfParse.default || pdfParse
+        const result = await parser(buffer)
+        return result.text ? String(result.text).slice(0, 7000) : null
+      } catch (err) {
+        console.warn('[pdf-parse] failed:', (err as Error).message)
       }
-      return parsed ? String(parsed).slice(0, 7000) : null
+      return null
     }
 
     if (type === 'text/plain') {
@@ -167,69 +190,22 @@ async function extractFileContent(driveClient: any, file: { id: string; type: st
   }
 }
 
-async function parsePdf(buffer: Buffer) {
-  try {
-    const pdfParse = (await import('pdf-parse')) as any
-    const parser = pdfParse.default || pdfParse
-    const result = await parser(buffer)
-    return result.text
-  } catch (err) {
-    console.warn('[parsePdf] failed:', err)
-    return ''
-  }
-}
-
-async function ocrThenExtract(buffer: Buffer) {
-  const tmp = os.tmpdir()
-  const stamp = Date.now().toString()
-  const inPath = path.join(tmp, `bizwatch-in-${stamp}.pdf`)
-  const outPath = path.join(tmp, `bizwatch-out-${stamp}.pdf`)
-  await fs.writeFile(inPath, buffer)
-
-  try {
-    await execFileAsync('ocrmypdf', ['--skip-text', inPath, outPath])
-    const outBuffer = await fs.readFile(outPath)
-    const pdfText = await parsePdf(outBuffer)
-    await Promise.allSettled([fs.unlink(inPath), fs.unlink(outPath)])
-    return pdfText
-  } catch (err: any) {
-    if (err.code !== 'ENOENT') {
-      // fallback to image OCR
-    }
-  }
-
-  const prefix = path.join(tmp, `bizwatch-pg-${stamp}`)
-  try {
-    await execFileAsync('pdftoppm', ['-png', inPath, prefix])
-    const files = await fs.readdir(tmp)
-    const pageFiles = files.filter((f) => f.startsWith(path.basename(prefix))).map((f) => path.join(tmp, f)).sort()
-    let combined = ''
-    for (const imgPath of pageFiles) {
-      try {
-        const visionText = await visionOcrImage(await fs.readFile(imgPath))
-        combined += visionText + '\n'
-      } catch {
-        const { stdout } = await execFileAsync('tesseract', [imgPath, 'stdout'])
-        combined += String(stdout) + '\n'
-      }
-    }
-    await Promise.allSettled([fs.unlink(inPath), ...pageFiles.map((p) => fs.unlink(p).catch(() => {}))])
-    return combined
-  } catch (err) {
-    await fs.unlink(inPath).catch(() => {})
-    return ''
-  }
-}
-
-async function visionOcrImage(buffer: Buffer) {
-  try {
-    const vision = await import('@google-cloud/vision')
-    const client = new vision.ImageAnnotatorClient()
-    const [result] = await client.documentTextDetection({ image: { content: buffer } })
-    return result.fullTextAnnotation?.text ?? ''
-  } catch (err) {
-    throw err
-  }
+async function extractWithMarkitdown(buffer: Buffer): Promise<string> {
+  const { spawn } = await import('child_process')
+  const script = path.join(process.cwd(), 'server', 'pdf_to_markdown.py')
+  return new Promise((resolve, reject) => {
+    const py = spawn('python3', [script])
+    const chunks: Buffer[] = []
+    py.stdout.on('data', (chunk: Buffer) => chunks.push(chunk))
+    py.stderr.on('data', (err: Buffer) => console.warn('[markitdown] stderr:', err.toString()))
+    py.on('close', (code: number | null) => {
+      if (code !== 0) return reject(new Error(`pdf_to_markdown exited with code ${code}`))
+      resolve(Buffer.concat(chunks).toString('utf8'))
+    })
+    py.on('error', reject)
+    py.stdin.write(buffer)
+    py.stdin.end()
+  })
 }
 
 export async function getGoogleProfile(code: string) {

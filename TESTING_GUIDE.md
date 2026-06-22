@@ -200,3 +200,6 @@ You'll know it's working when:
 4. ✅ No errors about missing API keys in frontend
 5. ✅ Token refresh happens silently on expiry
 6. ✅ Asking about files returns specific data, not generic responses
+
+
+the ai should only display work related

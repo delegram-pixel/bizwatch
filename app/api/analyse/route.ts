@@ -29,7 +29,11 @@ You will receive raw data from the user's Google Workspace. Analyse it and retur
   }
 }
 
-Derive everything from the actual data provided. Use ₦ for financial figures unless another currency is evident. Be specific — reference actual file names, email senders, event titles. For source_file and source_quote: populate these only when the item is derived from a Drive document — use the exact file name and copy the verbatim text from the document content. Set both to null when the source is gmail or calendar.`
+The data includes: driveFiles (recent Drive documents with content), emails (Gmail inbox), events (Calendar), and sheets (Google Sheets spreadsheets with CSV content).
+
+Set connectedSources.sheets to true only if the sheets array is non-empty. For items derived from a sheet, set source to "sheets", source_file to the exact sheet name, and source_quote to the verbatim cell data that supports the item. Set source_file and source_quote to null for gmail and calendar sources.
+
+Derive everything from the actual data provided. Use ₦ for financial figures unless another currency is evident. Be specific — reference actual file names, email senders, event titles.`
 
 export async function POST(request: Request) {
   const session = await getSession(request)
@@ -48,15 +52,16 @@ export async function POST(request: Request) {
 
   try {
     const auth = makeOAuthClientWithTokens(user.accessToken, user.refreshToken ?? undefined)
-    const { driveFiles, emails, events } = await fetchGoogleData(auth, { extractContents: true })
+    const { driveFiles, emails, events, sheets } = await fetchGoogleData(auth, { extractContents: true })
 
     console.log('[analyse] drive files:', driveFiles.map((f: any) => ({ name: f.name, type: f.type, hasContent: !!f.content, contentLength: f.content?.length ?? 0 })))
+    console.log('[analyse] sheets:', sheets.map((s: any) => ({ name: s.name, hasContent: !!s.content, contentLength: s.content?.length ?? 0 })))
 
-    const dataContext = JSON.stringify({ driveFiles, emails, events }, null, 2)
+    const dataContext = JSON.stringify({ driveFiles, emails, events, sheets }, null, 2)
     const anthropic = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY })
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 2048,
+      max_tokens: 4096,
       system: ANALYSE_PROMPT,
       messages: [
         {
